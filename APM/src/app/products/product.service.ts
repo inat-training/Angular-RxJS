@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 import { Product } from './product';
-import { Supplier } from '../suppliers/supplier';
 import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable({
@@ -13,10 +12,13 @@ import { SupplierService } from '../suppliers/supplier.service';
 })
 export class ProductService {
   private productsUrl = 'api/products';
-  private suppliersUrl = this.supplierService.suppliersUrl;
 
   products$ = this.http.get<Product[]>(this.productsUrl)
   .pipe(
+    map(products => products.map(product => ({
+      ...product,
+      price: product.price * 1.5
+    }) as Product)),
     tap(data => console.log('Products: ', JSON.stringify(data))),
     catchError(this.handleError)
   );

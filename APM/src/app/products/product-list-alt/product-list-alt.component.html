@@ -4,7 +4,7 @@
   </div>
 
   <div class='card-body'
-       *ngIf="products$ | async as products">
+       *ngIf="products$ | async as pro">
     <div class='list-group'>
       <button type='button'
               class='list-group-item'
@@ -16,7 +16,7 @@
     </div>
   </div>
 </div>
-git config --global user.email "7643707+mperrence@users.noreply.github.com"
+
 <div class="alert alert-danger"
      *ngIf="errorMessage">
   {{errorMessage}}

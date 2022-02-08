@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { combineLatest, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
 import { Product } from './product';
@@ -14,29 +14,45 @@ import { ProductCategoryService } from '../product-categories/product-category.s
 export class ProductService {
   private productsUrl = 'api/products';
 
-  products$ = this.http.get<Product[]>(this.productsUrl)
-  .pipe(
-    tap(data => console.log('Products: ', JSON.stringify(data))),
-    catchError(this.handleError)
-  );
+  products$ = this.http.get < Product[] > (this.productsUrl)
+    .pipe(
+      tap(data => console.log('Products: ', JSON.stringify(data))),
+      catchError(this.handleError)
+    );
 
   productsWithCategory$ = combineLatest([
     this.products$,
     this.productCategoryService.productsCategories$
   ]).pipe(
     map(([products, categories]) =>
-    products.map(product => ({
-      ...product,
-      price: product.price * 1.5,
-      category: categories.find(c => product.categoryId === c.id).name,
-      searchKey: [product.productName]
-    }) as Product)
+      products.map(product => ({
+        ...product,
+        price: product.price * 1.5,
+        category: categories.find(c => product.categoryId === c.id).name,
+        searchKey: [product.productName]
+      }) as Product)
     )
   );
- 
-  constructor(private http: HttpClient,
-              private productCategoryService: ProductCategoryService) { }
 
+  private productSelectedSubject = new BehaviorSubject<number>(0);
+  productSelectionAction$ = this.productSelectedSubject.asObservable();
+  
+  selectedProduct$ = combineLatest([
+    this.productsWithCategory$,
+    this.productSelectionAction$
+  ]).pipe(
+      map(([products, selectedProductId]) =>
+           products.find(product => product.id === selectedProductId)
+      ),
+      tap(product => console.log(`selectedProduct`, product))
+    );
+
+  constructor(private http: HttpClient,
+    private productCategoryService: ProductCategoryService) {}
+
+  selectedProductChanged(selectedProductId: number): void {
+    this.productSelectedSubject.next(selectedProductId);
+  }
   private fakeProduct(): Product {
     return {
       id: 42,
@@ -50,7 +66,7 @@ export class ProductService {
     };
   }
 
-  private handleError(err: any): Observable<never> {
+  private handleError(err: any): Observable < never > {
     // in a real world app, we may send the server to some remote logging infrastructure
     // instead of just logging it to the console
     let errorMessage: string;

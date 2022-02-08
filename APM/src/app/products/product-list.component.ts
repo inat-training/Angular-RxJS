@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { BehaviorSubject, combineLatest, EMPTY, Subject} from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY} from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ProductService } from './product.service';

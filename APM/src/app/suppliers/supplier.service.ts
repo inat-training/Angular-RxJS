@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { throwError, Observable } from 'rxjs';
+import { throwError, Observable, of } from 'rxjs';
+import { concatMap, mergeMap, switchMap, tap} from 'rxjs/operators';
+import { Supplier } from './supplier';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +11,28 @@ import { throwError, Observable } from 'rxjs';
 export class SupplierService {
   suppliersUrl = 'api/suppliers';
 
-  constructor(private http: HttpClient) { }
+  supplierWithConcatMap$ = of(1,5,8)
+  .pipe(
+    tap(id => console.log('concatMap source observable', id)),
+    concatMap (id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`)),
+    tap(item => console.log('concatMap result', item)),
+  );
+
+  supplierWithMergeMap$ = of(1,5,8)
+  .pipe(
+    tap(id => console.log('mergeMap source observable', id)),
+    mergeMap (id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`)),
+    tap(item => console.log('mergeMap result', item)),
+  );
+
+  supplierWithSwitchMap$ = of(1,5,8)
+  .pipe(
+    tap(id => console.log('switchMap source observable', id)),
+   switchMap (id => this.http.get<Supplier>(`${this.suppliersUrl}/${id}`)),
+    tap(item => console.log('switchMap result', item)),
+  );
+
+  constructor(private http: HttpClient) {}
 
   private handleError(err: any): Observable<never> {
     // in a real world app, we may send the server to some remote logging infrastructure

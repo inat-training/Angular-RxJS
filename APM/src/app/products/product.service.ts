@@ -16,7 +16,7 @@ export class ProductService {
 
   products$ = this.http.get < Product[] > (this.productsUrl)
     .pipe(
-      tap(data => console.log('Products: ', JSON.stringify(data))),
+       tap(data => console.log('Products: ', JSON.stringify(data))),
       catchError(this.handleError)
     );
 
@@ -60,7 +60,8 @@ export class ProductService {
   );
 
   constructor(private http: HttpClient,
-    private productCategoryService: ProductCategoryService) {}
+    private productCategoryService: ProductCategoryService,
+    private supplierService: SupplierService) {}
 
     selectedProductChanged(selectedProductId: number): void {
       this.productSelectedSubject.next(selectedProductId);
